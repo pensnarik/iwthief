@@ -1,0 +1,202 @@
+file /home/mutex/dev/iwspy/gpsd-3.3/SConstruct,line 374:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for chrpath... 
+chrpath -v
+chrpath version 0.13
+scons: Configure: yes
+
+scons: Configure: Checking whether the C++ compiler works
+.sconf_temp/conftest_1.cpp <-
+  |
+  |int main()
+  |{
+  |    return 0;
+  |}
+  |
+g++ -o .sconf_temp/conftest_1.o -c -O2 .sconf_temp/conftest_1.cpp
+scons: Configure: yes
+
+scons: Configure: Checking for ncurses... 
+pkg-config --exists 'ncurses'
+scons: Configure: no
+
+scons: Configure: Checking for ncurses5-config... 
+ncurses5-config --version
+sh: ncurses5-config: command not found
+scons: Configure: no
+
+scons: Configure: Checking for libusb-1.0... 
+pkg-config --exists 'libusb-1.0'
+scons: Configure: yes
+
+scons: Configure: Checking for C library librt... 
+.sconf_temp/conftest_5.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_5.o -c -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 .sconf_temp/conftest_5.c
+.sconf_temp/conftest_5.c:5:1: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+gcc -o .sconf_temp/conftest_5 -Wl,-rpath=/home/mutex/dev/iwspy/gpsd-3.3 -Wl,-rpath=/usr/local/lib .sconf_temp/conftest_5.o -L. -L/usr/local/lib -lrt
+scons: Configure: yes
+
+scons: Configure: Checking for bluez... 
+pkg-config --exists 'bluez'
+scons: Configure: yes
+
+scons: Configure: Checking for C header file sys/timepps.h... 
+.sconf_temp/conftest_7.c <-
+  |
+  |#include <sys/timepps.h>
+  |
+  |
+gcc -o .sconf_temp/conftest_7.o -c -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 .sconf_temp/conftest_7.c
+.sconf_temp/conftest_7.c:2:25: fatal error: sys/timepps.h: No such file or directory
+compilation terminated.
+scons: Configure: no
+
+scons: Configure: Checking for C function daemon()... 
+.sconf_temp/conftest_8.c <-
+  |
+  |
+  |#include <assert.h>
+  |
+  |#ifdef __cplusplus
+  |extern "C"
+  |#endif
+  |char daemon();
+  |
+  |int main() {
+  |#if defined (__stub_daemon) || defined (__stub___daemon)
+  |  fail fail fail
+  |#else
+  |  daemon();
+  |#endif
+  |
+  |  return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_8.o -c -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 .sconf_temp/conftest_8.c
+.sconf_temp/conftest_8.c:8:1: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+.sconf_temp/conftest_8.c:10:5: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+gcc -o .sconf_temp/conftest_8 -Wl,-rpath=/home/mutex/dev/iwspy/gpsd-3.3 -Wl,-rpath=/usr/local/lib .sconf_temp/conftest_8.o -L. -L/usr/local/lib -lrt
+scons: Configure: yes
+
+scons: Configure: Checking for C function strlcpy()... 
+.sconf_temp/conftest_9.c <-
+  |
+  |
+  |#include <assert.h>
+  |
+  |#ifdef __cplusplus
+  |extern "C"
+  |#endif
+  |char strlcpy();
+  |
+  |int main() {
+  |#if defined (__stub_strlcpy) || defined (__stub___strlcpy)
+  |  fail fail fail
+  |#else
+  |  strlcpy();
+  |#endif
+  |
+  |  return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_9.o -c -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 .sconf_temp/conftest_9.c
+.sconf_temp/conftest_9.c:8:1: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+.sconf_temp/conftest_9.c:10:5: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+gcc -o .sconf_temp/conftest_9 -Wl,-rpath=/home/mutex/dev/iwspy/gpsd-3.3 -Wl,-rpath=/usr/local/lib .sconf_temp/conftest_9.o -L. -L/usr/local/lib -lrt
+.sconf_temp/conftest_9.o: In function `main':
+conftest_9.c:(.text.startup+0x7): undefined reference to `strlcpy'
+collect2: ld returned 1 exit status
+scons: Configure: no
+
+scons: Configure: Checking for C function strlcat()... 
+.sconf_temp/conftest_10.c <-
+  |
+  |
+  |#include <assert.h>
+  |
+  |#ifdef __cplusplus
+  |extern "C"
+  |#endif
+  |char strlcat();
+  |
+  |int main() {
+  |#if defined (__stub_strlcat) || defined (__stub___strlcat)
+  |  fail fail fail
+  |#else
+  |  strlcat();
+  |#endif
+  |
+  |  return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_10.o -c -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 .sconf_temp/conftest_10.c
+.sconf_temp/conftest_10.c:8:1: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+.sconf_temp/conftest_10.c:10:5: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+gcc -o .sconf_temp/conftest_10 -Wl,-rpath=/home/mutex/dev/iwspy/gpsd-3.3 -Wl,-rpath=/usr/local/lib .sconf_temp/conftest_10.o -L. -L/usr/local/lib -lrt
+.sconf_temp/conftest_10.o: In function `main':
+conftest_10.c:(.text.startup+0x7): undefined reference to `strlcat'
+collect2: ld returned 1 exit status
+scons: Configure: no
+
+scons: Configure: Checking for C function clock_gettime()... 
+.sconf_temp/conftest_11.c <-
+  |
+  |
+  |#include <assert.h>
+  |
+  |#ifdef __cplusplus
+  |extern "C"
+  |#endif
+  |char clock_gettime();
+  |
+  |int main() {
+  |#if defined (__stub_clock_gettime) || defined (__stub___clock_gettime)
+  |  fail fail fail
+  |#else
+  |  clock_gettime();
+  |#endif
+  |
+  |  return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_11.o -c -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 .sconf_temp/conftest_11.c
+.sconf_temp/conftest_11.c:8:1: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+.sconf_temp/conftest_11.c:10:5: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+gcc -o .sconf_temp/conftest_11 -Wl,-rpath=/home/mutex/dev/iwspy/gpsd-3.3 -Wl,-rpath=/usr/local/lib .sconf_temp/conftest_11.o -L. -L/usr/local/lib -lrt
+scons: Configure: yes
+
+scons: Configure: Checking for C library libbluetooth... 
+.sconf_temp/conftest_12.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_12.o -c -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 .sconf_temp/conftest_12.c
+.sconf_temp/conftest_12.c:5:1: warning: function declaration isn't a prototype [-Wstrict-prototypes]
+gcc -o .sconf_temp/conftest_12 -Wl,-rpath=/home/mutex/dev/iwspy/gpsd-3.3 -Wl,-rpath=/usr/local/lib .sconf_temp/conftest_12.o -L. -L/usr/local/lib -lrt -lbluetooth
+scons: Configure: yes
+
+scons: Configure: Checking that xsltproc can make man pages... 
+xsltproc --nonet --noout 'http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl' xmltest.xml
+sh: xsltproc: command not found
+scons: Configure: no
+
+scons: Configure: Checking for QtNetwork... 
+pkg-config --exists 'QtNetwork'
+scons: Configure: yes
+
+

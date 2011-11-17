@@ -1,0 +1,264 @@
+= Building GPSD from source ==
+
+This is a guide to building GPSD from a bare source tree.  It includes
+guidance on how to cross-build the package.
+
+(This file is marked up in asciidoc.)
+
+== Check your build prerequisites ==
+
+Necessary components for any build:
+
+|==============================================================================
+|C compiler         | gpsd and client library are written in C
+|Python             | some code is generated from python scripts
+|scons              | for executing the build recipe 
+|chrpath            | needed with scons for RPATH setting
+|==============================================================================
+
+C99 conformance is required in the compiler. The C code depends on one
+non-C99 feature: anonymous unions.  We could eliminate these, but the
+cost would be source-level interface breakage if we have to move
+structure members in and out of unions.
+
+GPSD is normally built and tested with GCC. The shared-memory
+interface relies on one GCCism, but the code is otherwise pretty
+compiler-agnostic.  It is reported that clang produces a gpsd that
+passes all regression tests. If -Wmissing-field-initializers or
+its non-gcc equivalent is set you will get a lot of warnings; 
+this is due to generated code and cannot be fixed.
+
+You will need scons version 1.2.0 or later to build the code. The
+autotools build from 2.96 and earlier versions has been dropped.
+
+While Python is required to build GPSD from source (the build uses
+some code generators in Python), it is not required to run the service
+daemon.  In particular, you can cross-compile onto an embedded system
+without having to take Python with you.
+
+Yes, you will need chrpath. libtool is a messy pile of crocks, and
+throwing it out of our build chain was a good thing, but it had
+consguences. Whatever its other flawes, libtool successfully hid some
+tricky problems related to dynamic-linkage paths; to address these
+in the scons build, you need chrpath present to edit those paths.
+
+(We previously tried to make chrpath optional.  This turned out to be
+too tricky to get right to be worth it.  So install chrpath. Now.)
+
+Having the following optional components on your system will enable
+various additional capabilities and extensions:
+
+|============================================================================
+|C++ compiler	  | allows building libgpsmm C++ wrapper for client library
+|Qt 4.53+         | allows building libQgpsmm C++ wrapper for client library
+|============================================================================
+
+If you have libusb-1.0.0 or later, the GPSD build will autodetect
+this and use it to discover Garmin USB GPSes, rather than groveling
+through /proc/bus/usb/devices (which has been deprecated by the
+Linux kernel team).
+
+You can build libQgpsmm if you have Qt (specifically the (specifically
+QtCore and QtNetwork modules) version 4.5.3 or higher.  You will also
+need a C++ compiler supported by Qt (tested on GCC 4.4.0/mingw on
+Windows and GCC 4.1.2 on linux). Please refer to Qt's documentation at
+http://qt.nokia.com/doc/4.6/platform-specific.html for platform
+specific building documentation
+
+For working with DBUS, you'll need the DBUS development
+headers and libraries installed.  Under Debian/Ubuntu these
+are the packages libdbus-1-dev and libdbus-glib-1-dev.
+
+Under Ubuntu, the ncurses package you want is libncurses5-dev.
+Depending on how your distribution packages ncurses you may
+also require libtinfo5, a separate terminfo library.
+
+For building from the source tree, or if you change the man page
+source, xslt and docbook xsl style files are used to generate nroff
+-man source from docbook xml.  The following packages are used in this
+process:
+
+|============================================================================
+|libxslt            | xsltproc is used to build man pages from xml
+|docbook-xsl        | style file for xml to man translation
+|============================================================================
+
+The build degrades gracefully in the absence of any of these. You should
+be able to tell from configure messages which extensions you will get.
+
+Under Ubuntu and most other Debian-derived distributions, an easy way
+to pick up the prerequisites is: "apt-get build-dep gpsd"
+
+If you are custom-building a Linux kernel for embedded deployment, you
+will need some subset of the following modules:
+
+|============================================================================
+|pl2303     | Prolific Technology, Inc. PL2303 Serial Port
+|ftdi_sio   | FTDI 8U232AM / FT232
+|cypress_m8 | M8/CY7C64013
+|cp210x     | Cygnal Integrated Products devices
+|garmin_gps | Garmin USB mice including GPS-18
+|cdc_am     | USB Communication Device Class Abstract Control Model interface
+|============================================================================
+
+These are listed in rough order of devices covered as of 2011; the
+PL23203 by itself accounts for over 70% of deployed USB mice.  We
+recommend building with pl2303, ftdi_sio, cypress_m8, and cp210x.
+
+== How to build the software from source ==
+
+To build gpsd for your host platform from source, simply call 'scons'
+in a working-directory copy. (Cross-build is described in a later
+section.)
+
+You can specify the installation prefix, as for an autotools build, by
+running "scons prefix=<installation_root>". The default value is
+"/usr/local".  The envoronment variable DESTDIR also works in the 
+usual way.
+
+If your link fails with a message like "/usr/bin/ld: cannot find -lgps",
+you need to install chrpath.  Note that after you have done so, you
+may need to run 'scons --config=force' to override the scons 
+configuration cache's belief that chrpath isn't there.
+
+If your scons fails with the complaint "No tool named 'textfile'",
+you need to upgrade it.  This feature was introduced during the long
+interval after the 1.2.0 release; 1.2.1 and later versions will have it.
+
+If your linker run fails with missing math symbols, see the FIXME
+comment relating to implicit_links in the scons recipe; you probably
+need to build with implicit_link=no.  If this happens, please report
+your platform, ideally along with a way of identifying it from Python,
+to the GPSD maintainers.
+
+If you are going to use the RTCM-104 support, you should compile with
+gcc4; if you don't have it installed as your default compiler, do this
+by specifying CC=gcc4 before the build command.  The rtcm2.c file
+confuses the gcc-3.4.[23] optimizer at -O2 level, making it generate
+incorrect code.
+
+After building, please run 'scons testregress' to test the correctness
+of the build.  It is not necessary to install first, but you do need
+to have "." in your $PATH to run regressions uninstalled.  Python is
+required for regression tests. If any of the tests fail, you probavly
+have a toolchain issue.  The most common such problem is issues with
+strict C99 conformance in floating-point libraries.
+
+Once you have verified that the code is working, "scons install" 
+will install it it in the system directories. "scons uninstall" will
+undo this. Note: because scons is a single-phase build system, this
+may recompile everything. If you want feature-configuration options,
+you need to specify them here.
+
+To enable hotplugging of USB GPSes under Linux, you may do 'scons
+udev-install' to put the appropriate udev rules and wrapper files in
+place.
+
+You will need php and php-gd installed to support the PHP web page.
+included with the distribution. To install it, copy the file
+'gpsd.php' to your HTML document directory. Then see the
+post-installation instructions in INSTALL for how to configure it.
+
+== Optional features ==
+
+By giving command-line options to scons you can configure certain rarely-used
+optional features in, or compile standard features out to reduce gpsd's 
+footprint. "scons --help" will tell the story; look under "Local Options"
+and consult the source code if in doubt.
+
+Here are a few of the more important feature switches.  Each description
+begins with the default for the xwitch.
+
+pps=yes: for small embedded systems and those without threading,
+it is possible to build gpsd without thread support if you build
+with pps=no.  You'll lose support for updating the clock from PPS
+pulses.
+
+dbus=no: for systems using DBUS: gpsd includes support for shipping
+fixes as DBUS notifications, but it is not compiled in by default.
+Build with the option "dbus=yes" to get it working.
+
+libQgpsmm=yes: libQgpsmm is a Qt version of the libgps/libgpsmm
+pair. Thanks to the multi-platform approach of Qt, it allows the gpsd
+client library to be available on all the Qt supported platforms.
+Please see http://qt.nokia.com/doc/4.6/supported-platforms.html for a
+status of Qt supported platforms as of version 4.6.
+
+== Reverting to a clean state ==
+
+The scons equivalent of 'make clean' is 'scons -c'. This will revert
+your source tree to a clean state as though you had just cloned or
+downloaded it.
+
+== Cross-building ==
+
+The scons recipe is intended to support cross-building, in particular
+for embedded deployment of the software.  A session transcript
+illustrating how to do that, with some routine messages suppressed and
+replaced with [...], follows.  The script assumes you're cloning from the 
+GPSD project site or a mirror. Notes and explanation follow the transcript.
+
+===========================================================================
+$ git clone [...]
+Cloning into gpsd...
+[...]
+$ cd gpsd
+$ cp ../.scons-option-cache .
+$ cat .scons-option-cache
+libgpsmm = False
+libQgpsmm = False
+python = False
+prefix = '/work/buildroot/output/staging/usr/'
+sysroot = '/work/buildroot/output/staging/'
+target = 'arm-indigo-linux-gnueabi'
+$ scons 
+scons: Reading SConscript files ...
+[...]
+Altered configuration variables:
+libgpsmm = False (default True): build C++ bindings
+libQgpsmm = False (default True): build QT bindings
+python = False (default True): build Python support and modules.
+prefix = /work/buildroot/output/staging/usr/ (default /usr/local): installation directory prefix
+sysroot = /work/buildroot/output/staging (default ): cross-development system root
+target = arm-indigo-linux-gnueabi (default ): cross-development target
+scons: done reading SConscript files.
+scons: Building targets ...
+substituter(["jsongen.py"], ["jsongen.py.in"])
+chmod -w jsongen.py
+chmod +x jsongen.py
+rm -f ais_json.i && /usr/bin/python jsongen.py --ais --target=parser > ais_json.i && chmod a-w ais_json.i
+Creating 'gpsd_config.h'
+arm-indigo-linux-gnueabi-gcc -o ais_json.os -c --sysroot=/work/buildroot/output/staging/ -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 -fPIC ais_json.c
+arm-indigo-linux-gnueabi-gcc -o daemon.os -c --sysroot=/work/buildroot/output/staging/ -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 -fPIC daemon.c
+Creating 'gpsd.h'
+[...]
+chmod -w maskaudit.py
+chmod +x maskaudit.py
+rm -f gps_maskdump.c && /usr/bin/python maskaudit.py -c . > gps_maskdump.c && chmod a-w gps_maskdump.c
+arm-indigo-linux-gnueabi-gcc -o gps_maskdump.os -c --sysroot=/work/buildroot/output/staging/ -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 -fPIC gps_maskdump.c
+[..]
+scons: done building targets.
+$ file gpsd
+gpsd: ELF 32-bit LSB executable, ARM, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.36, not stripped
+===========================================================================
+
+The author of this transcript notes:
+
+The sysroot option tells the compiler and linker to use libraries and
+headers from the given path as if they were placed at / prefix. During
+this build the option allows linking with target ncurses (with the option
+of having more packages at the --sysroot path) and including correct
+headers without specifying -I and -L options.
+
+In the options cache file gpsd is configured to install to
+/work/buildroot/output/staging/usr path, so gpsd clients could be
+compiled against libgps.so using /work/buildroot/output/staging as
+sysroot option.
+
+"arm-indigo-linux-gnueabi" as target means that
+arm-indigo-linux-gnueabi-gcc and related tools are available in PATH;
+your cross-compiler is likely to have a different target prefix.
+
+When you are cross-compiling, you'll need chrpath at version 0.14 or
+later for cross-architecture support.  If it's not yet packaged for
+your environment, see http://alioth.debian.org/projects/chrpath/
